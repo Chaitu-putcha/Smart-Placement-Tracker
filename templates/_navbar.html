@@ -1,0 +1,44 @@
+<nav class="navbar navbar-expand-lg spt-navbar sticky-top">
+  <div class="container">
+    <a class="navbar-brand spt-brand" href="{{ url_for('index') }}">
+      <span class="mark">SP</span> Smart Placement Tracker
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMain">
+      {% if not current_user.is_authenticated %}
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-1">
+        <li class="nav-item"><a class="nav-link spt-link" href="{{ url_for('index') }}#features">Features</a></li>
+        <li class="nav-item"><a class="nav-link spt-link" href="{{ url_for('index') }}#how-it-works">How it works</a></li>
+        <li class="nav-item ms-lg-2"><a class="btn btn-spt-outline btn-sm px-3" href="{{ url_for('login') }}">Log in</a></li>
+        <li class="nav-item"><a class="btn btn-spt-primary btn-sm px-3" href="{{ url_for('register') }}">Get started</a></li>
+        <li class="nav-item ms-lg-2">
+          <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+            <span class="knob">🌙</span>
+          </button>
+        </li>
+      </ul>
+      {% else %}
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-1">
+        <li class="nav-item"><a class="nav-link spt-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link spt-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            {{ current_user.full_name.split(' ')[0] }}
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="{{ url_for('dashboard') }}#profile">My profile</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">Log out</a></li>
+          </ul>
+        </li>
+        <li class="nav-item ms-lg-2">
+          <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+            <span class="knob">🌙</span>
+          </button>
+        </li>
+      </ul>
+      {% endif %}
+    </div>
+  </div>
+</nav>

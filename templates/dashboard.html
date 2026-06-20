@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Smart Placement Tracker</title>
+  {% include "_theme_init.html" %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+
+  {% include "_navbar.html" %}
+  {% include "_flashes.html" %}
+
+  <div class="dash-shell">
+    <!-- ===================== SIDEBAR ===================== -->
+    <aside class="dash-sidebar">
+      <div class="student-chip">
+        <div class="student-avatar">{{ student.full_name[0]|upper }}</div>
+        <div class="overflow-hidden">
+          <div class="fw-semibold text-truncate">{{ student.full_name }}</div>
+          <div class="text-muted small text-truncate">{{ student.branch }} · {{ student.year }}</div>
+        </div>
+      </div>
+
+      <ul class="nav nav-pills flex-column" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link active" data-bs-toggle="pill" href="#overview" role="tab">
+            <i class="bi bi-grid-1x2"></i> Overview
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-bs-toggle="pill" href="#profile" role="tab">
+            <i class="bi bi-person-badge"></i> Profile
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-bs-toggle="pill" href="#coding" role="tab">
+            <i class="bi bi-code-slash"></i> Coding tracker
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-bs-toggle="pill" href="#aptitude" role="tab">
+            <i class="bi bi-calculator"></i> Aptitude tracker
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-bs-toggle="pill" href="#resume" role="tab">
+            <i class="bi bi-file-earmark-pdf"></i> Resume
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-bs-toggle="pill" href="#companies" role="tab">
+            <i class="bi bi-building"></i> Companies
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-bs-toggle="pill" href="#applications" role="tab">
+            <i class="bi bi-send-check"></i> Applications
+            {% if applications %}<span class="badge bg-secondary ms-1">{{ applications|length }}</span>{% endif %}
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" data-bs-toggle="pill" href="#analytics" role="tab">
+            <i class="bi bi-bar-chart-line"></i> Analytics
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- ===================== MAIN CONTENT ===================== -->
+    <main class="dash-main">
+      <div class="tab-content">
+
+        <!-- ---------- OVERVIEW ---------- -->
+        <div class="tab-pane fade show active tab-pane-fade" id="overview" role="tabpanel">
+          <h3 class="mb-1">Welcome back, {{ student.full_name.split(' ')[0] }} 👋</h3>
+          <p class="text-muted mb-4">Here's where your placement prep stands today.</p>
+
+          <div class="row g-4 mb-2">
+            <div class="col-lg-4">
+              <div class="card-spt text-center h-100">
+                <h6 class="text-muted text-uppercase" style="font-size:0.75rem; letter-spacing:0.05em;">Placement readiness</h6>
+                <div class="readiness-ring my-3" style="--pct: {{ readiness.overall }};">
+                  <div class="ring-inner">
+                    <b>{{ readiness.overall }}%</b>
+                    <span>Ready</span>
+                  </div>
+                </div>
+                <p class="text-muted small mb-0">Based on CGPA, coding, aptitude, resume &amp; profile completeness.</p>
+              </div>
+            </div>
+
+            <div class="col-lg-8">
+              <div class="row g-3 h-100">
+                <div class="col-sm-6 col-xl-3">
+                  <div class="stat-tile">
+                    <div class="stat-label">CGPA</div>
+                    <div class="stat-value">{{ "%.2f"|format(student.cgpa) }}</div>
+                  </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                  <div class="stat-tile">
+                    <div class="stat-label">LeetCode solved</div>
+                    <div class="stat-value">{{ coding.leetcode_solved }}</div>
+                  </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                  <div class="stat-tile">
+                    <div class="stat-label">Aptitude avg</div>
+                    <div class="stat-value">{{ readiness.aptitude_pct }}%</div>
+                  </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                  <div class="stat-tile">
+                    <div class="stat-label">Eligible companies</div>
+                    <div class="stat-value">{{ chart_data.eligibility.values[0] }}<span class="text-muted" style="font-size:1rem;">/{{ companies|length }}</span></div>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="card-spt mb-0">
+                    <h6 class="mb-3">Readiness breakdown</h6>
+                    <div class="mb-3">
+                      <div class="d-flex justify-content-between small mb-1"><span>CGPA</span><span class="font-mono">{{ readiness.cgpa_score }}/25</span></div>
+                      <div class="progress-spt"><div style="width: {{ (readiness.cgpa_score/25*100)|round(0) }}%;"></div></div>
+                    </div>
+                    <div class="mb-3">
+                      <div class="d-flex justify-content-between small mb-1"><span>Coding</span><span class="font-mono">{{ readiness.coding_score }}/25</span></div>
+                      <div class="progress-spt"><div style="width: {{ (readiness.coding_score/25*100)|round(0) }}%;"></div></div>
+                    </div>
+                    <div class="mb-3">
+                      <div class="d-flex justify-content-between small mb-1"><span>Aptitude</span><span class="font-mono">{{ readiness.aptitude_score }}/25</span></div>
+                      <div class="progress-spt"><div style="width: {{ (readiness.aptitude_score/25*100)|round(0) }}%;"></div></div>
+                    </div>
+                    <div class="mb-3">
+                      <div class="d-flex justify-content-between small mb-1"><span>Resume uploaded</span><span class="font-mono">{{ readiness.resume_score }}/15</span></div>
+                      <div class="progress-spt"><div style="width: {{ (readiness.resume_score/15*100)|round(0) }}%;"></div></div>
+                    </div>
+                    <div class="mb-0">
+                      <div class="d-flex justify-content-between small mb-1"><span>Profile completeness</span><span class="font-mono">{{ readiness.profile_score }}/10</span></div>
+                      <div class="progress-spt"><div style="width: {{ (readiness.profile_score/10*100)|round(0) }}%;"></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- PROFILE ---------- -->
+        <div class="tab-pane fade tab-pane-fade" id="profile" role="tabpanel">
+          <h4 class="mb-1">Student profile</h4>
+          <p class="text-muted mb-4">This information is used to check company eligibility — keep it current.</p>
+
+          <div class="card-spt" style="max-width: 640px;">
+            <form method="POST" action="{{ url_for('update_profile') }}">
+              <div class="row g-3">
+                <div class="col-12">
+                  <label class="form-label">Full name</label>
+                  <input type="text" class="form-control" name="full_name" value="{{ student.full_name }}" required>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Email address</label>
+                  <input type="email" class="form-control" value="{{ student.email }}" disabled>
+                  <div class="form-text">Email cannot be changed.</div>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Branch</label>
+                  <select class="form-select" name="branch">
+                    {% for b in ['CSE', 'IT', 'ECE', 'EEE', 'MECH', 'CIVIL', 'AI&DS', 'AI&ML', 'Other'] %}
+                      <option value="{{ b }}" {% if student.branch == b %}selected{% endif %}>{{ b }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Year</label>
+                  <select class="form-select" name="year">
+                    {% for y in ['1st Year', '2nd Year', '3rd Year', 'Final Year'] %}
+                      <option value="{{ y }}" {% if student.year == y %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">CGPA</label>
+                  <input type="number" class="form-control" name="cgpa" step="0.01" min="0" max="10" value="{{ student.cgpa }}">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Phone number</label>
+                  <input type="tel" class="form-control" name="phone" value="{{ student.phone or '' }}" placeholder="10-digit mobile number">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-spt-primary mt-4">Save changes</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- ---------- CODING TRACKER ---------- -->
+        <div class="tab-pane fade tab-pane-fade" id="coding" role="tabpanel">
+          <h4 class="mb-1">Coding progress</h4>
+          <p class="text-muted mb-4">Update this weekly so your readiness score reflects real progress.</p>
+
+          <div class="row g-4">
+            <div class="col-lg-7">
+              <div class="card-spt">
+                <form method="POST" action="{{ url_for('update_coding') }}">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label class="form-label">LeetCode problems solved</label>
+                      <input type="number" class="form-control" name="leetcode_solved" min="0" value="{{ coding.leetcode_solved }}">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">CodeChef rating</label>
+                      <input type="number" class="form-control" name="codechef_rating" min="0" value="{{ coding.codechef_rating }}">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">HackerRank badges</label>
+                      <input type="number" class="form-control" name="hackerrank_badges" min="0" value="{{ coding.hackerrank_badges }}">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">GitHub repositories</label>
+                      <input type="number" class="form-control" name="github_repos" min="0" value="{{ coding.github_repos }}">
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label d-flex justify-content-between">
+                        <span>DSA topics completed</span>
+                        <span class="font-mono text-muted" id="dsaTopicsValue">{{ coding.dsa_topics_completed }}/15</span>
+                      </label>
+                      <input type="range" class="form-range" name="dsa_topics_completed" min="0" max="15"
+                             value="{{ coding.dsa_topics_completed }}"
+                             oninput="document.getElementById('dsaTopicsValue').textContent = this.value + '/15'">
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-spt-primary mt-4">Update coding progress</button>
+                </form>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <div class="row g-3">
+                <div class="col-6">
+                  <div class="stat-tile"><div class="stat-label">LeetCode</div><div class="stat-value">{{ coding.leetcode_solved }}</div></div>
+                </div>
+                <div class="col-6">
+                  <div class="stat-tile"><div class="stat-label">CodeChef</div><div class="stat-value">{{ coding.codechef_rating }}</div></div>
+                </div>
+                <div class="col-6">
+                  <div class="stat-tile"><div class="stat-label">HackerRank</div><div class="stat-value">{{ coding.hackerrank_badges }}</div></div>
+                </div>
+                <div class="col-6">
+                  <div class="stat-tile"><div class="stat-label">GitHub repos</div><div class="stat-value">{{ coding.github_repos }}</div></div>
+                </div>
+                <div class="col-12">
+                  <div class="card-spt mb-0">
+                    <div class="d-flex justify-content-between small mb-1"><span>Coding readiness</span><span class="font-mono">{{ readiness.coding_pct }}%</span></div>
+                    <div class="progress-spt"><div style="width: {{ readiness.coding_pct }}%;"></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- APTITUDE TRACKER ---------- -->
+        <div class="tab-pane fade tab-pane-fade" id="aptitude" role="tabpanel">
+          <h4 class="mb-1">Aptitude progress</h4>
+          <p class="text-muted mb-4">Log your latest mock-test scores out of 100.</p>
+
+          <div class="row g-4">
+            <div class="col-lg-7">
+              <div class="card-spt">
+                <form method="POST" action="{{ url_for('update_aptitude') }}">
+                  <div class="row g-3">
+                    <div class="col-12">
+                      <label class="form-label d-flex justify-content-between">
+                        <span>Quantitative aptitude</span>
+                        <span class="font-mono text-muted" id="quantValue">{{ aptitude.quant_score }}/100</span>
+                      </label>
+                      <input type="range" class="form-range" name="quant_score" min="0" max="100"
+                             value="{{ aptitude.quant_score }}"
+                             oninput="document.getElementById('quantValue').textContent = this.value + '/100'">
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label d-flex justify-content-between">
+                        <span>Logical reasoning</span>
+                        <span class="font-mono text-muted" id="logicalValue">{{ aptitude.logical_score }}/100</span>
+                      </label>
+                      <input type="range" class="form-range" name="logical_score" min="0" max="100"
+                             value="{{ aptitude.logical_score }}"
+                             oninput="document.getElementById('logicalValue').textContent = this.value + '/100'">
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label d-flex justify-content-between">
+                        <span>Verbal ability</span>
+                        <span class="font-mono text-muted" id="verbalValue">{{ aptitude.verbal_score }}/100</span>
+                      </label>
+                      <input type="range" class="form-range" name="verbal_score" min="0" max="100"
+                             value="{{ aptitude.verbal_score }}"
+                             oninput="document.getElementById('verbalValue').textContent = this.value + '/100'">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Mock tests taken</label>
+                      <input type="number" class="form-control" name="mock_tests_taken" min="0" value="{{ aptitude.mock_tests_taken }}">
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-spt-primary mt-4">Update aptitude progress</button>
+                </form>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <div class="card-spt h-100">
+                <h6 class="mb-3">Average aptitude score</h6>
+                <div class="d-flex align-items-end gap-2 mb-3">
+                  <span class="stat-value" style="font-size:2.5rem;">{{ readiness.aptitude_pct }}%</span>
+                </div>
+                <div class="progress-spt mb-4"><div style="width: {{ readiness.aptitude_pct }}%;"></div></div>
+                <ul class="list-unstyled small text-muted mb-0">
+                  <li class="d-flex justify-content-between mb-2"><span>Quant</span><span class="font-mono">{{ aptitude.quant_score }}</span></li>
+                  <li class="d-flex justify-content-between mb-2"><span>Logical</span><span class="font-mono">{{ aptitude.logical_score }}</span></li>
+                  <li class="d-flex justify-content-between mb-0"><span>Verbal</span><span class="font-mono">{{ aptitude.verbal_score }}</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- RESUME ---------- -->
+        <div class="tab-pane fade tab-pane-fade" id="resume" role="tabpanel">
+          <h4 class="mb-1">Resume</h4>
+          <p class="text-muted mb-4">Upload a PDF resume — companies will see your most recent one.</p>
+
+          <div class="row g-4">
+            <div class="col-lg-6">
+              <div class="card-spt">
+                <form method="POST" action="{{ url_for('upload_resume') }}" enctype="multipart/form-data">
+                  <div class="upload-drop" id="resumeDropZone">
+                    <i class="bi bi-cloud-arrow-up fs-2 d-block mb-2"></i>
+                    <span>Click to browse or drag a PDF here</span>
+                    <div class="small mt-2 d-none" id="resumeFileName"></div>
+                  </div>
+                  <input type="file" name="resume" id="resumeInput" accept="application/pdf" class="d-none" required>
+                  <button type="submit" class="btn btn-spt-primary w-100 mt-3">Upload resume</button>
+                  <div class="form-text">PDF only, max 5 MB.</div>
+                </form>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <h6 class="mb-3">Your resumes</h6>
+              {% if resumes %}
+                {% for r in resumes %}
+                <div class="resume-row">
+                  <div class="d-flex align-items-center gap-2 overflow-hidden">
+                    <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i>
+                    <div class="overflow-hidden">
+                      <div class="text-truncate" style="max-width: 220px;">{{ r.original_filename }}</div>
+                      <div class="small text-muted">{{ r.upload_date.split('T')[0] }}</div>
+                    </div>
+                  </div>
+                  <div class="d-flex gap-2 flex-shrink-0">
+                    <a href="{{ url_for('download_resume', filename=r.filename) }}" target="_blank" class="btn btn-sm btn-spt-outline"><i class="bi bi-eye"></i></a>
+                    <form method="POST" action="{{ url_for('delete_resume', resume_id=r.id) }}" onsubmit="return confirm('Delete this resume?');">
+                      <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                    </form>
+                  </div>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="card-spt text-center text-muted">
+                  <i class="bi bi-file-earmark-pdf fs-1 mb-2 d-block"></i>
+                  No resume uploaded yet.
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- COMPANIES ---------- -->
+        <div class="tab-pane fade tab-pane-fade" id="companies" role="tabpanel">
+          <h4 class="mb-1">Company drives</h4>
+          <p class="text-muted mb-4">Filter by name or show only the companies you're eligible for.</p>
+
+          <div class="d-flex flex-wrap gap-3 align-items-center mb-4">
+            <div class="flex-grow-1" style="min-width:220px; max-width:360px;">
+              <input type="text" class="form-control" id="companySearch" placeholder="Search company or role...">
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="eligibleOnlyToggle">
+              <label class="form-check-label small" for="eligibleOnlyToggle">Eligible only</label>
+            </div>
+          </div>
+
+          <div class="row g-4">
+            {% for c in companies %}
+            {% set eligible = is_eligible(student, c) %}
+            <div class="col-md-6 col-xl-4 company-card-col"
+                 data-name="{{ c.company_name }}" data-role="{{ c.role }}" data-eligible="{{ 'true' if eligible else 'false' }}">
+              <div class="company-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <h6 class="mb-0">{{ c.company_name }}</h6>
+                  {% if eligible %}
+                    <span class="badge-spt badge-eligible">Eligible</span>
+                  {% else %}
+                    <span class="badge-spt badge-not-eligible">Not eligible</span>
+                  {% endif %}
+                </div>
+                <div class="text-muted small mb-3">{{ c.role }}</div>
+                <ul class="list-unstyled small mb-3 flex-grow-1">
+                  <li class="d-flex justify-content-between mb-1"><span class="text-muted">Package</span><span class="font-mono">₹{{ c.package }} LPA</span></li>
+                  <li class="d-flex justify-content-between mb-1"><span class="text-muted">Min CGPA</span><span class="font-mono">{{ c.min_cgpa }}</span></li>
+                  <li class="d-flex justify-content-between mb-1"><span class="text-muted">Branches</span><span class="font-mono text-end">{{ c.eligible_branches }}</span></li>
+                  <li class="d-flex justify-content-between"><span class="text-muted">Drive date</span><span class="font-mono">{{ c.drive_date }}</span></li>
+                </ul>
+                <p class="text-muted small mb-3">{{ c.eligibility }}</p>
+
+                {% if c.id in applied_company_ids %}
+                  <button class="btn btn-spt-outline w-100" disabled><i class="bi bi-check2"></i> Applied</button>
+                {% elif eligible %}
+                  <form method="POST" action="{{ url_for('apply_company', company_id=c.id) }}">
+                    <button type="submit" class="btn btn-spt-accent w-100">Apply now</button>
+                  </form>
+                {% else %}
+                  <button class="btn btn-spt-outline w-100" disabled>Not eligible</button>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <div id="companiesEmptyState" class="text-center text-muted py-5 d-none">
+            <i class="bi bi-search fs-1 mb-2 d-block"></i>
+            No companies match your filters.
+          </div>
+        </div>
+
+        <!-- ---------- APPLICATIONS ---------- -->
+        <div class="tab-pane fade tab-pane-fade" id="applications" role="tabpanel">
+          <h4 class="mb-1">My applications</h4>
+          <p class="text-muted mb-4">Track every company you've applied to and its current status.</p>
+
+          {% if applications %}
+          <div class="card-spt p-0">
+            <div class="table-responsive">
+              <table class="table table-spt mb-0">
+                <thead>
+                  <tr>
+                    <th class="ps-3">Company</th>
+                    <th>Role</th>
+                    <th>Package</th>
+                    <th>Status</th>
+                    <th>Applied on</th>
+                    <th class="pe-3"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for a in applications %}
+                  <tr>
+                    <td class="ps-3 fw-semibold">{{ a.company_name }}</td>
+                    <td>{{ a.role }}</td>
+                    <td class="font-mono">₹{{ a.package }} LPA</td>
+                    <td><span class="badge-status {{ a.status }}">{{ a.status }}</span></td>
+                    <td class="text-muted small">{{ a.applied_date.split('T')[0] }}</td>
+                    <td class="pe-3 text-end">
+                      <form method="POST" action="{{ url_for('withdraw_application', application_id=a.id) }}" onsubmit="return confirm('Withdraw this application?');">
+                        <button class="btn btn-sm btn-outline-danger">Withdraw</button>
+                      </form>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {% else %}
+          <div class="card-spt text-center text-muted py-5">
+            <i class="bi bi-send fs-1 mb-2 d-block"></i>
+            You haven't applied to any companies yet. Head to the Companies tab to get started.
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- ---------- ANALYTICS ---------- -->
+        <div class="tab-pane fade tab-pane-fade" id="analytics" role="tabpanel">
+          <h4 class="mb-1">Placement analytics</h4>
+          <p class="text-muted mb-4">A visual snapshot of your readiness and application pipeline.</p>
+
+          <div class="row g-4">
+            <div class="col-lg-6">
+              <div class="chart-card">
+                <h6 class="mb-3">Skill profile</h6>
+                <canvas id="skillRadarChart"></canvas>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="chart-card">
+                <h6 class="mb-3">Eligible vs. not eligible companies</h6>
+                <canvas id="eligibilityChart"></canvas>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="chart-card">
+                <h6 class="mb-3">Application status</h6>
+                <canvas id="applicationsChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    window.SPT_CHART_DATA = {{ chart_data | tojson }};
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
