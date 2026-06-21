@@ -54,6 +54,16 @@ from werkzeug.utils import secure_filename
 # --------------------------------------------------------------------------
 app = Flask(__name__)
 
+# Render (and most PaaS hosts) sit behind a reverse proxy that terminates
+# HTTPS and forwards plain HTTP to your app, plus rewrites Host. Without
+# ProxyFix, Flask thinks every request is plain http:// on Render's internal
+# hostname, so url_for(..., _external=True) builds OAuth redirect_uris with
+# the wrong scheme/host — causing redirect_uri_mismatch on Google/Microsoft/
+# GitHub/LinkedIn even though the exact same code works fine on localhost.
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+app.config["PREFERRED_URL_SCHEME"] = "https"
+
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 app.config["UPLOAD_FOLDER"] = os.path.join(os.path.abspath(os.path.dirname(__file__)), "uploads", "resumes")
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB
@@ -580,8 +590,16 @@ def linkedin_login():
 @app.route("/authorize/linkedin")
 def linkedin_authorize():
     try:
-        token     = oauth.linkedin.authorize_access_token()
-        user_info = token.get("userinfo") or {}
+        oauth.linkedin.authorize_access_token()
+        # FIX: token.get("userinfo") is never populated for this client
+        # registration (no server_metadata_url/jwks_uri configured for ID
+        # token verification), so it always returned {} and login always
+        # failed with "did not return an email". Fetch userinfo directly
+        # instead — api_base_url is already set to https://api.linkedin.com/v2/,
+        # so this hits https://api.linkedin.com/v2/userinfo with the
+        # access token attached automatically, same pattern as the GitHub route above.
+        resp      = oauth.linkedin.get("userinfo")
+        user_info = resp.json()
         email     = user_info.get("email", "").lower()
         name      = user_info.get("name", email.split("@")[0])
         if not email:
