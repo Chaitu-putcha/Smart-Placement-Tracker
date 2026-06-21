@@ -37,6 +37,7 @@ ALLOWED_RESUME_EXT = {"pdf"}
 MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB resume upload cap
 
 app = Flask(__name__)
+init_db()
 app.config["SECRET_KEY"] = "dev-secret-key-change-this-in-production"  # change before deploying
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"] = MAX_CONTENT_LENGTH
@@ -654,5 +655,4 @@ def not_found(e):
 # Entry point
 # --------------------------------------------------------------------------
 if __name__ == "__main__":
-    init_db()
     app.run(debug=True)
