@@ -106,7 +106,7 @@
                 <div class="col-sm-6 col-xl-3">
                   <div class="stat-tile">
                     <div class="stat-label">LeetCode solved</div>
-                    <div class="stat-value">{{ coding.leetcode_solved }}</div>
+                    <div class="stat-value">{{ coding.leetcode_solved if coding else 0 }}</div>
                   </div>
                 </div>
                 <div class="col-sm-6 col-xl-3">
@@ -159,6 +159,7 @@
 
           <div class="card-spt" style="max-width: 640px;">
             <form method="POST" action="{{ url_for('update_profile') }}">
+              <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
               <div class="row g-3">
                 <div class="col-12">
                   <label class="form-label">Full name</label>
@@ -208,30 +209,35 @@
             <div class="col-lg-7">
               <div class="card-spt">
                 <form method="POST" action="{{ url_for('update_coding') }}">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                   <div class="row g-3">
                     <div class="col-md-6">
                       <label class="form-label">LeetCode problems solved</label>
-                      <input type="number" class="form-control" name="leetcode_solved" min="0" value="{{ coding.leetcode_solved }}">
+                      <input type="number" class="form-control" name="leetcode_solved" min="0"
+                             value="{{ coding.leetcode_solved if coding else 0 }}">
                     </div>
                     <div class="col-md-6">
                       <label class="form-label">CodeChef rating</label>
-                      <input type="number" class="form-control" name="codechef_rating" min="0" value="{{ coding.codechef_rating }}">
+                      <input type="number" class="form-control" name="codechef_rating" min="0"
+                             value="{{ coding.codechef_rating if coding else 0 }}">
                     </div>
                     <div class="col-md-6">
                       <label class="form-label">HackerRank badges</label>
-                      <input type="number" class="form-control" name="hackerrank_badges" min="0" value="{{ coding.hackerrank_badges }}">
+                      <input type="number" class="form-control" name="hackerrank_badges" min="0"
+                             value="{{ coding.hackerrank_badges if coding else 0 }}">
                     </div>
                     <div class="col-md-6">
                       <label class="form-label">GitHub repositories</label>
-                      <input type="number" class="form-control" name="github_repos" min="0" value="{{ coding.github_repos }}">
+                      <input type="number" class="form-control" name="github_repos" min="0"
+                             value="{{ coding.github_repos if coding else 0 }}">
                     </div>
                     <div class="col-12">
                       <label class="form-label d-flex justify-content-between">
                         <span>DSA topics completed</span>
-                        <span class="font-mono text-muted" id="dsaTopicsValue">{{ coding.dsa_topics_completed }}/15</span>
+                        <span class="font-mono text-muted" id="dsaTopicsValue">{{ (coding.dsa_topics_completed if coding else 0) }}/15</span>
                       </label>
                       <input type="range" class="form-range" name="dsa_topics_completed" min="0" max="15"
-                             value="{{ coding.dsa_topics_completed }}"
+                             value="{{ coding.dsa_topics_completed if coding else 0 }}"
                              oninput="document.getElementById('dsaTopicsValue').textContent = this.value + '/15'">
                     </div>
                   </div>
@@ -242,16 +248,16 @@
             <div class="col-lg-5">
               <div class="row g-3">
                 <div class="col-6">
-                  <div class="stat-tile"><div class="stat-label">LeetCode</div><div class="stat-value">{{ coding.leetcode_solved }}</div></div>
+                  <div class="stat-tile"><div class="stat-label">LeetCode</div><div class="stat-value">{{ coding.leetcode_solved if coding else 0 }}</div></div>
                 </div>
                 <div class="col-6">
-                  <div class="stat-tile"><div class="stat-label">CodeChef</div><div class="stat-value">{{ coding.codechef_rating }}</div></div>
+                  <div class="stat-tile"><div class="stat-label">CodeChef</div><div class="stat-value">{{ coding.codechef_rating if coding else 0 }}</div></div>
                 </div>
                 <div class="col-6">
-                  <div class="stat-tile"><div class="stat-label">HackerRank</div><div class="stat-value">{{ coding.hackerrank_badges }}</div></div>
+                  <div class="stat-tile"><div class="stat-label">HackerRank</div><div class="stat-value">{{ coding.hackerrank_badges if coding else 0 }}</div></div>
                 </div>
                 <div class="col-6">
-                  <div class="stat-tile"><div class="stat-label">GitHub repos</div><div class="stat-value">{{ coding.github_repos }}</div></div>
+                  <div class="stat-tile"><div class="stat-label">GitHub repos</div><div class="stat-value">{{ coding.github_repos if coding else 0 }}</div></div>
                 </div>
                 <div class="col-12">
                   <div class="card-spt mb-0">
@@ -273,37 +279,39 @@
             <div class="col-lg-7">
               <div class="card-spt">
                 <form method="POST" action="{{ url_for('update_aptitude') }}">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                   <div class="row g-3">
                     <div class="col-12">
                       <label class="form-label d-flex justify-content-between">
                         <span>Quantitative aptitude</span>
-                        <span class="font-mono text-muted" id="quantValue">{{ aptitude.quant_score }}/100</span>
+                        <span class="font-mono text-muted" id="quantValue">{{ (aptitude.quant_score if aptitude else 0) }}/100</span>
                       </label>
                       <input type="range" class="form-range" name="quant_score" min="0" max="100"
-                             value="{{ aptitude.quant_score }}"
+                             value="{{ aptitude.quant_score if aptitude else 0 }}"
                              oninput="document.getElementById('quantValue').textContent = this.value + '/100'">
                     </div>
                     <div class="col-12">
                       <label class="form-label d-flex justify-content-between">
                         <span>Logical reasoning</span>
-                        <span class="font-mono text-muted" id="logicalValue">{{ aptitude.logical_score }}/100</span>
+                        <span class="font-mono text-muted" id="logicalValue">{{ (aptitude.logical_score if aptitude else 0) }}/100</span>
                       </label>
                       <input type="range" class="form-range" name="logical_score" min="0" max="100"
-                             value="{{ aptitude.logical_score }}"
+                             value="{{ aptitude.logical_score if aptitude else 0 }}"
                              oninput="document.getElementById('logicalValue').textContent = this.value + '/100'">
                     </div>
                     <div class="col-12">
                       <label class="form-label d-flex justify-content-between">
                         <span>Verbal ability</span>
-                        <span class="font-mono text-muted" id="verbalValue">{{ aptitude.verbal_score }}/100</span>
+                        <span class="font-mono text-muted" id="verbalValue">{{ (aptitude.verbal_score if aptitude else 0) }}/100</span>
                       </label>
                       <input type="range" class="form-range" name="verbal_score" min="0" max="100"
-                             value="{{ aptitude.verbal_score }}"
+                             value="{{ aptitude.verbal_score if aptitude else 0 }}"
                              oninput="document.getElementById('verbalValue').textContent = this.value + '/100'">
                     </div>
                     <div class="col-md-6">
                       <label class="form-label">Mock tests taken</label>
-                      <input type="number" class="form-control" name="mock_tests_taken" min="0" value="{{ aptitude.mock_tests_taken }}">
+                      <input type="number" class="form-control" name="mock_tests_taken" min="0"
+                             value="{{ aptitude.mock_tests_taken if aptitude else 0 }}">
                     </div>
                   </div>
                   <button type="submit" class="btn btn-spt-primary mt-4">Update aptitude progress</button>
@@ -318,9 +326,9 @@
                 </div>
                 <div class="progress-spt mb-4"><div style="width: {{ readiness.aptitude_pct }}%;"></div></div>
                 <ul class="list-unstyled small text-muted mb-0">
-                  <li class="d-flex justify-content-between mb-2"><span>Quant</span><span class="font-mono">{{ aptitude.quant_score }}</span></li>
-                  <li class="d-flex justify-content-between mb-2"><span>Logical</span><span class="font-mono">{{ aptitude.logical_score }}</span></li>
-                  <li class="d-flex justify-content-between mb-0"><span>Verbal</span><span class="font-mono">{{ aptitude.verbal_score }}</span></li>
+                  <li class="d-flex justify-content-between mb-2"><span>Quant</span><span class="font-mono">{{ aptitude.quant_score if aptitude else 0 }}</span></li>
+                  <li class="d-flex justify-content-between mb-2"><span>Logical</span><span class="font-mono">{{ aptitude.logical_score if aptitude else 0 }}</span></li>
+                  <li class="d-flex justify-content-between mb-0"><span>Verbal</span><span class="font-mono">{{ aptitude.verbal_score if aptitude else 0 }}</span></li>
                 </ul>
               </div>
             </div>
@@ -336,6 +344,7 @@
             <div class="col-lg-6">
               <div class="card-spt">
                 <form method="POST" action="{{ url_for('upload_resume') }}" enctype="multipart/form-data">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                   <div class="upload-drop" id="resumeDropZone">
                     <i class="bi bi-cloud-arrow-up fs-2 d-block mb-2"></i>
                     <span>Click to browse or drag a PDF here</span>
@@ -360,8 +369,11 @@
                     </div>
                   </div>
                   <div class="d-flex gap-2 flex-shrink-0">
-                    <a href="{{ url_for('download_resume', filename=r.filename) }}" target="_blank" class="btn btn-sm btn-spt-outline"><i class="bi bi-eye"></i></a>
-                    <form method="POST" action="{{ url_for('delete_resume', resume_id=r.id) }}" onsubmit="return confirm('Delete this resume?');">
+                    <a href="{{ url_for('download_resume', filename=r.filename) }}" target="_blank"
+                       class="btn btn-sm btn-spt-outline"><i class="bi bi-eye"></i></a>
+                    <form method="POST" action="{{ url_for('delete_resume', resume_id=r.id) }}"
+                          onsubmit="return confirm('Delete this resume?');">
+                      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                       <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
                     </form>
                   </div>
@@ -419,6 +431,7 @@
                   <button class="btn btn-spt-outline w-100" disabled><i class="bi bi-check2"></i> Applied</button>
                 {% elif eligible %}
                   <form method="POST" action="{{ url_for('apply_company', company_id=c.id) }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-spt-accent w-100">Apply now</button>
                   </form>
                 {% else %}
@@ -462,7 +475,9 @@
                     <td><span class="badge-status {{ a.status }}">{{ a.status }}</span></td>
                     <td class="text-muted small">{{ a.applied_date.split('T')[0] }}</td>
                     <td class="pe-3 text-end">
-                      <form method="POST" action="{{ url_for('withdraw_application', application_id=a.id) }}" onsubmit="return confirm('Withdraw this application?');">
+                      <form method="POST" action="{{ url_for('withdraw_application', application_id=a.id) }}"
+                            onsubmit="return confirm('Withdraw this application?');">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                         <button class="btn btn-sm btn-outline-danger">Withdraw</button>
                       </form>
                     </td>
@@ -507,9 +522,9 @@
           </div>
         </div>
 
-      </div>
+      </div><!-- tab-content -->
     </main>
-  </div>
+  </div><!-- dash-shell -->
 
   <script>
     window.SPT_CHART_DATA = {{ chart_data | tojson }};

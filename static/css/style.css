@@ -548,3 +548,69 @@ a:hover { color: var(--teal-400); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
 }
+/* OAuth Divider - "or continue with" లైన్ */
+.oauth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+.oauth-divider::before,
+.oauth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* OAuth Buttons - అన్ని బటన్లకు బేస్ స్టైల్ */
+.btn-oauth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: filter var(--transition), box-shadow var(--transition);
+  border: 1px solid transparent;
+}
+.btn-oauth:hover {
+  filter: brightness(0.93);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Google బటన్ */
+.btn-oauth-google {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+/* GitHub బటన్ */
+.btn-oauth-github {
+  background: #24292e;
+  color: #fff;
+  border-color: #24292e;
+}
+[data-theme="dark"] .btn-oauth-github {
+  background: #161b22;
+  border-color: #30363d;
+}
+
+/* Microsoft బటన్ */
+.btn-oauth-microsoft {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+/* LinkedIn బటన్ */
+.btn-oauth-linkedin {
+  background: #0a66c2;
+  color: #fff;
+  border-color: #0a66c2;
+}

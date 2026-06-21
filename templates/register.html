@@ -24,6 +24,7 @@
       </div>
 
       <form method="POST" action="{{ url_for('register') }}" novalidate>
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
         <div class="row g-3">
           <div class="col-12">
             <label class="form-label" for="full_name">Full name</label>
@@ -37,11 +38,13 @@
           </div>
           <div class="col-md-6">
             <label class="form-label" for="password">Password</label>
-            <input type="password" class="form-control" id="password" name="password" placeholder="Min. 6 characters" required>
+            <input type="password" class="form-control" id="password" name="password"
+                   placeholder="Min. 6 characters" required>
           </div>
           <div class="col-md-6">
             <label class="form-label" for="confirm_password">Confirm password</label>
-            <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Re-enter password" required>
+            <input type="password" class="form-control" id="confirm_password"
+                   name="confirm_password" placeholder="Re-enter password" required>
           </div>
           <div class="col-md-4">
             <label class="form-label" for="branch">Branch</label>
@@ -61,7 +64,8 @@
           </div>
           <div class="col-md-4">
             <label class="form-label" for="cgpa">CGPA</label>
-            <input type="number" class="form-control" id="cgpa" name="cgpa" step="0.01" min="0" max="10"
+            <input type="number" class="form-control" id="cgpa" name="cgpa"
+                   step="0.01" min="0" max="10"
                    value="{{ form.cgpa or '' }}" placeholder="Eg. 8.4">
           </div>
           <div class="col-12">
@@ -70,7 +74,6 @@
                    value="{{ form.phone or '' }}" placeholder="10-digit mobile number">
           </div>
         </div>
-
         <button type="submit" class="btn btn-spt-primary w-100 py-2 mt-4">Create account</button>
       </form>
 
